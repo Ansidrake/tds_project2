@@ -60,7 +60,7 @@ class DatasetAnalysis:
         :return: Dictionary with analysis insights
         """
         analysis = {
-            'total_rows': len(self.df),
+            'total_rows': int(len(self.df)),  # Convert to standard int
             'columns': list(self.df.columns),
             'column_types': {col: str(self.df[col].dtype) for col in self.df.columns}
         }
@@ -69,22 +69,22 @@ class DatasetAnalysis:
         numeric_columns = self.df.select_dtypes(include=[np.number]).columns
         analysis['numeric_columns'] = {
             col: {
-                'mean': self.df[col].mean(),
-                'median': self.df[col].median(),
-                'std': self.df[col].std(),
-                'min': self.df[col].min(),
-                'max': self.df[col].max()
+                'mean': float(self.df[col].mean()),
+                'median': float(self.df[col].median()),
+                'std': float(self.df[col].std()),
+                'min': float(self.df[col].min()),
+                'max': float(self.df[col].max())
             } for col in numeric_columns
         }
         
         # Missing values analysis
-        analysis['missing_values'] = self.df.isnull().sum().to_dict()
+        analysis['missing_values'] = {k: int(v) for k, v in self.df.isnull().sum().to_dict().items()}
         
         # Correlation matrix for numeric columns
         if len(numeric_columns) > 1:
             try:
                 correlation_matrix = self.df[numeric_columns].corr()
-                analysis['correlation_matrix'] = correlation_matrix.to_dict()
+                analysis['correlation_matrix'] = correlation_matrix.applymap(float).to_dict()  # Convert all values to float
             except Exception as e:
                 print(f"Correlation matrix generation failed: {e}")
         
